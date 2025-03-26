@@ -15,44 +15,46 @@
     </ContentPage.Resources>
     <Grid>
         <CollectionView 
-            x:Name="FileCollectionView" 
-                ItemsSource="{Binding FileItems}" 
-                SelectionMode="None"
-                SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
-                BackgroundColor="LightBlue"
-                Margin="1">
+    x:Name="FileCollectionView" 
+        ItemsSource="{Binding FileItems}" 
+        SelectionMode="None"
+        SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+        BackgroundColor="AliceBlue"
+        Margin="1">
             <CollectionView.ItemsLayout>
                 <LinearItemsLayout Orientation="Vertical" ItemSpacing="2" />
             </CollectionView.ItemsLayout>
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Grid ColumnDefinitions="Auto,40,*" RowDefinitions="40" Background="White">
+                    <Grid ColumnDefinitions="Auto,40,*" RowDefinitions="40" >
                         <BoxView 
-                            Grid.Column="0" 
-                            WidthRequest="{Binding Space}"
-                            BackgroundColor="{Binding BackgroundColor, Source={x:Reference FileCollectionView}}"/>
+                    Grid.Column="0" 
+                    WidthRequest="{Binding Space}"
+                    BackgroundColor="{
+                        Binding BackgroundColor, 
+                        Source={x:Reference FileCollectionView}}"/>
                         <Button 
-                            Grid.Column="1" 
-                            Text="{Binding PlusMinusGlyph}" 
-                            TextColor="{Binding IsEmptyFolder, Converter={StaticResource BoolToColorConverter}}"
-                            Command="{
-                                Binding PlusMinusToggleCommand, 
-                                Source={x:Reference MainPageViewModel}}"
-                            CommandParameter="{Binding .}"
-                            FontSize="16"
-                            FontFamily="file-and-folder-icons"
-                            BackgroundColor="Transparent"
-                            Padding="0"
-                            BorderWidth="0"
-                            VerticalOptions="Fill"
-                            HorizontalOptions="Fill"
-                            MinimumHeightRequest="0"
-                            MinimumWidthRequest="0"
-                            CornerRadius="0"/>
+                    Grid.Column="1" 
+                    Text="{Binding PlusMinusGlyph}" 
+                    TextColor="Black"
+                    Command="{
+                        Binding PlusMinusToggleCommand, 
+                        Source={x:Reference MainPageViewModel}}"
+                    CommandParameter="{Binding .}"
+                    FontSize="16"
+                    FontFamily="file-and-folder-icons"
+                    BackgroundColor="Transparent"
+                    Padding="0"
+                    BorderWidth="0"
+                    VerticalOptions="Fill"
+                    HorizontalOptions="Fill"
+                    MinimumHeightRequest="0"
+                    MinimumWidthRequest="0"
+                    CornerRadius="0"/>
                         <Label 
-                            Grid.Column="2"
-                            Text="{Binding Text}" 
-                            VerticalTextAlignment="Center" Padding="2,0,0,0"/>
+                    Grid.Column="2"
+                    Text="{Binding Text}" 
+                    VerticalTextAlignment="Center" Padding="2,0,0,0"/>
                     </Grid>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
