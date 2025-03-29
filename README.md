@@ -1,3 +1,53 @@
+In addition to Stephen's excellent (and genuinely recursive) treatment of this, I decided to lease my own answer up but simplify it greatly because it's still a decent way of going about this. Basically, backing a tree-style view with portable XML means that the same business logic can be used more universally, e.g. Maui, WinForms, WPF etc. The latest features of the NuGet package for [XBoundObject](https://www.nuget.org/packages/IVSoftware.Portable.Xml.Linq.XBoundObject/2.0.0) introduces the `IBoundObjectView` interface and a portable implementation for a "has a" or an "is a" relationship to the interface (let's choose the second option);
+
+
+
+
+___
+
+#### Data Template
+
+There is no need for recursion here. The width of the `BoxView` creates the 2-dimensional effect.
+
+```
+ <DataTemplate>
+    <Grid ColumnDefinitions="Auto,40,*" RowDefinitions="40" >
+        <BoxView 
+            Grid.Column="0" 
+            WidthRequest="{Binding Space}"
+            BackgroundColor="{
+                Binding BackgroundColor, 
+                Source={x:Reference FileCollectionView}}"/>
+        <Button 
+            Grid.Column="1" 
+            Text="{Binding PlusMinusGlyph}" 
+            TextColor="Black"
+            Command="{
+                Binding PlusMinusToggleCommand, 
+                Source={x:Reference MainPageViewModel}}"
+            CommandParameter="{Binding .}"
+            FontSize="16"
+            FontFamily="file-and-folder-icons"
+            BackgroundColor="Transparent"
+            Padding="0"
+            BorderWidth="0"
+            VerticalOptions="Fill"
+            HorizontalOptions="Fill"
+            MinimumHeightRequest="0"
+            MinimumWidthRequest="0"
+            CornerRadius="0"/>
+        <Label 
+            Grid.Column="2"
+            Text="{Binding Text}" 
+            VerticalTextAlignment="Center" Padding="2,0,0,0"/>
+    </Grid>
+</DataTemplate>
+```
+
+
+
+
+
 Files and Folders are a good example of hierarchal data that may need to be displayed not only in MAUI but also in frameworks like WinForms or WPF. There will also be a need to manipulate this data (e.g. Drag Drop) while keeping it decoupled from the UI. This can be facilitated using an inherently recursive runtime data structure like `System.Xml.Linq.XElement` that is a universal in all of .NET and so brings portability to the solution.
 
 Let's jump right in by declaring our "tree".
@@ -67,46 +117,7 @@ foreach (var xel in BindingContext.XRoot.Descendants())
 ```
 
 [![android screenshot](https://stackoverflowteams.com/c/sqdev/images/s/6ac025ff-00ed-4e00-b19f-690014b6c83d.png)](https://stackoverflowteams.com/c/sqdev/images/s/6ac025ff-00ed-4e00-b19f-690014b6c83d.png)
-___
 
-#### Data Template
-
-There is no need for recursion here. The width of the `BoxView` creates the 2-dimensional effect.
-
-```
- <DataTemplate>
-    <Grid ColumnDefinitions="Auto,40,*" RowDefinitions="40" >
-        <BoxView 
-    Grid.Column="0" 
-    WidthRequest="{Binding Space}"
-    BackgroundColor="{
-        Binding BackgroundColor, 
-        Source={x:Reference FileCollectionView}}"/>
-        <Button 
-    Grid.Column="1" 
-    Text="{Binding PlusMinusGlyph}" 
-    TextColor="Black"
-    Command="{
-        Binding PlusMinusToggleCommand, 
-        Source={x:Reference MainPageViewModel}}"
-    CommandParameter="{Binding .}"
-    FontSize="16"
-    FontFamily="file-and-folder-icons"
-    BackgroundColor="Transparent"
-    Padding="0"
-    BorderWidth="0"
-    VerticalOptions="Fill"
-    HorizontalOptions="Fill"
-    MinimumHeightRequest="0"
-    MinimumWidthRequest="0"
-    CornerRadius="0"/>
-        <Label 
-    Grid.Column="2"
-    Text="{Binding Text}" 
-    VerticalTextAlignment="Center" Padding="2,0,0,0"/>
-    </Grid>
-</DataTemplate>
-```
 #### Data Model
 
 The `Space` property controls the indentation shown on the view.

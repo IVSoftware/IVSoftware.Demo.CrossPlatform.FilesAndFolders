@@ -26,8 +26,8 @@ namespace BasicPlacement.Maui
                         Text = xel.Attribute("text")?.Value ?? "Error",
                         PlusMinus = 
                             ReferenceEquals(xel, newXel)
-                            ? string.Empty
-                            : "-",
+                            ? PlusMinus.Leaf
+                            : PlusMinus.Expanded,
                         Space = 10 * xel.Ancestors().Skip(1).Count(),
                     });
                 }
@@ -35,122 +35,14 @@ namespace BasicPlacement.Maui
         }
         new MainPageViewModel BindingContext => (MainPageViewModel)base.BindingContext;
     }
-    class MainPageViewModel : INotifyPropertyChanged
+    class MainPageViewModel
     {
-        public XElement XRoot { get; } = new ("root");
+        public XElement XRoot { get; } = new("root");
         public ObservableCollection<FileItem> FileItems { get; } = new();
-        public FileItem? SelectedItem
-        {
-            get => _selectedItem;
-            set
-            {
-                if (!Equals(_selectedItem, value))
-                {
-                    _selectedItem = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-        FileItem? _selectedItem = null;
-        public ICommand PlusMinusToggleCommand
-        {
-            get
-            {
-                if (_plusMinusToggleCommand is null)
-                {
-                    _plusMinusToggleCommand = new Command<FileItem>((fileItem) =>
-                    {
-                        switch (fileItem.PlusMinus)
-                        {
-                            case "+":
-                                try
-                                {
-                                    IsBusy = true;
-                                    var index = 0;
-                                    fileItem.PlusMinus = "-";
-                                    foreach (var xel in XRoot.VisibleElements())
-                                    {
-                                        var currentFileItem = xel.To<FileItem>();
-                                        var currentIndex = FileItems.IndexOf(currentFileItem);
-                                        if (index < FileItems.Count)
-                                        {
-                                            var current = FileItems[index];
-                                            if (ReferenceEquals(current, currentFileItem))
-                                            {   /* G T K */
-                                                // Item exists at the correct index.
-                                            }
-                                            else
-                                            {
-                                                if (currentIndex == -1)
-                                                {
-                                                    FileItems.Insert(index, currentFileItem);
-                                                }
-                                                else
-                                                {
-                                                    Debug.Fail("First Time! Make sure this works.");
-                                                    FileItems.Move(currentIndex, index);
-                                                }
-                                            }
-                                        }
-                                        else
-                                        {
-                                            FileItems.Insert(index, currentFileItem);
-                                        }
-                                        index++;
-                                    }
-                                }
-                                finally
-                                {
-                                    IsBusy = false;
-                                }
-                                break;
-                            case "-":
-                                foreach (var desc in fileItem.XEL.Descendants())
-                                {
-                                    if (desc.To<FileItem>() is { } remove)
-                                    {
-                                        FileItems.Remove(remove);
-                                    }
-                                }
-                                fileItem.PlusMinus = "+";
-                                break;
-                            default:
-                                Debug.Fail("Unexpected");
-                                break;
-                        }
-                    });
-                }
-                return _plusMinusToggleCommand;
-            }
-        }
-        ICommand? _plusMinusToggleCommand = null;
-
-        public bool IsBusy
-        {
-            get => _isBusy;
-            set
-            {
-                if (!Equals(_isBusy, value))
-                {
-                    _isBusy = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-        bool _isBusy = default;
-
-        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        public event PropertyChangedEventHandler? PropertyChanged;
     }
-    class FileItem : INotifyPropertyChanged
+    class FileItem :  XBoundViewObjectImplementer
     {
-        public FileItem(XElement xel)
-        {
-            XEL = xel;
-            xel.SetBoundAttributeValue(this);
-        }
-        public XElement XEL { get; }
+        public FileItem(XElement xel) : base (xel) { }
 
         public string Text
         {
@@ -166,30 +58,16 @@ namespace BasicPlacement.Maui
         }
         string _text = string.Empty;
 
-        public string PlusMinus
-        {
-            get => _plusMinus;
-            set
-            {
-                if (!Equals(_plusMinus, value))
-                {
-                    _plusMinus = value;
-                    OnPropertyChanged();
-                    OnPropertyChanged(nameof(PlusMinusGlyph));
-                }
-            }
-        }
-        string _plusMinus = "+";
-
         public string PlusMinusGlyph
         {
             get
             {
                 switch (PlusMinus)
                 {
-                    case "+":
+                    case PlusMinus.Collapsed:
                         return "\uE803";
-                    case "-":
+                    case PlusMinus.Partial:
+                    case PlusMinus.Expanded:
                         return "\uE804";
                     default:
                         return "\uE805";
@@ -212,36 +90,16 @@ namespace BasicPlacement.Maui
 
         int _space = default;
 
-        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        public event PropertyChangedEventHandler? PropertyChanged;
-    }
-    internal static class Extensions
-    {
-        public static IEnumerable<XElement> VisibleElements(this XElement @this)
+        protected override void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
-            Debug.Assert(@this.Name.LocalName == "root");
-            foreach (var element in localAddChildItems(@this.Elements()))
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            switch (propertyName)
             {
-                yield return element;
-            }
-            IEnumerable<XElement> localAddChildItems(IEnumerable<XElement> elements)
-            {
-                foreach (var element in elements)
-                {
-                    if (element.To<FileItem>() is { } fileItem)
-                    {
-                        yield return element;
-                        if (fileItem.PlusMinus == "-")
-                        {
-                            foreach (var childElement in localAddChildItems(element.Elements()))
-                            {
-                                yield return childElement;
-                            }
-                        }
-                    }
-                }
+                case nameof(PlusMinus):
+                    OnPropertyChanged(nameof(PlusMinusGlyph));
+                    break;
             }
         }
+        public event PropertyChangedEventHandler? PropertyChanged;
     }
 }
