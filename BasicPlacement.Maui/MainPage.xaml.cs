@@ -14,49 +14,30 @@ namespace BasicPlacement.Maui
         public MainPage()
         {
             InitializeComponent();
+
             string path =
                 @"C:\Github\IVSoftware\Demo\IVSoftware.Demo.CrossPlatform.FilesAndFolders\BasicPlacement.Maui\BasicPlacement.Maui.csproj"
                 .Replace('\\', Path.DirectorySeparatorChar);
-            if (PlacerResult.Created == BindingContext.XRoot.Place(path, out XElement newXel))
-            {
-                foreach (var xel in BindingContext.XRoot.Descendants())
-                {
-                    BindingContext.FileItems.Add(new FileItem(xel)
-                    {
-                        Text = xel.Attribute("text")?.Value ?? "Error",
-                        PlusMinus = 
-                            ReferenceEquals(xel, newXel)
-                            ? PlusMinus.Leaf
-                            : PlusMinus.Expanded,
-                        Space = 10 * xel.Ancestors().Skip(1).Count(),
-                    });
-                }
-            }
+
+            BindingContext.XRoot.Show(path);
+            BindingContext.SyncListToXML();
         }
         new MainPageViewModel BindingContext => (MainPageViewModel)base.BindingContext;
     }
     class MainPageViewModel
     {
-        public XElement XRoot { get; } = new("root");
+        public MainPageViewModel() 
+        {
+            XRoot = new XElement("root").UseXBoundView(FileItems);
+        }
+        public XElement XRoot { get; }
         public ObservableCollection<FileItem> FileItems { get; } = new();
+
+        public void SyncListToXML() => XRoot.To<ViewContext>().SyncList();
     }
     class FileItem :  XBoundViewObjectImplementer
     {
-        public FileItem(XElement xel) : base (xel) { }
-
-        public string Text
-        {
-            get => _text;
-            set
-            {
-                if (!Equals(_text, value))
-                {
-                    _text = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-        string _text = string.Empty;
+        public string Text => XEL.Attribute("text")?.Value ?? string.Empty;
 
         public string PlusMinusGlyph
         {
@@ -75,31 +56,18 @@ namespace BasicPlacement.Maui
             }
         }
 
-        public int Space
-        {
-            get => _space;
-            set
-            {
-                if (!Equals(_space, value))
-                {
-                    _space = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        int _space = default;
+        public int Space => 10 * (XEL.Ancestors().Count() - 1);
 
         protected override void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            base.OnPropertyChanged(propertyName);
             switch (propertyName)
             {
                 case nameof(PlusMinus):
                     OnPropertyChanged(nameof(PlusMinusGlyph));
+                    OnPropertyChanged(nameof(Space));
                     break;
             }
         }
-        public event PropertyChangedEventHandler? PropertyChanged;
     }
 }
