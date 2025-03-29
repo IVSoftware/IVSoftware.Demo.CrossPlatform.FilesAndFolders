@@ -32,10 +32,9 @@ namespace BasicPlacement.Maui
         }
         public XElement XRoot { get; }
         public ObservableCollection<FileItem> FileItems { get; } = new();
-
         public void SyncListToXML() => XRoot.To<ViewContext>().SyncList();
     }
-    class FileItem :  XBoundViewObjectImplementer
+    class FileItem : XBoundViewObjectImplementer
     {
         public override string PlusMinusGlyph
         {
