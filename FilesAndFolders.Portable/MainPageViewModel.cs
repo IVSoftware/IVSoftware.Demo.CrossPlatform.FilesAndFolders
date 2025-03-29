@@ -194,6 +194,10 @@ namespace FilesAndFolders.Portable
                         {
                             continue;
                         }
+                        if (directory.EndsWith("System Volume Information", StringComparison.OrdinalIgnoreCase))
+                        {
+                            continue;
+                        }
                         try
                         {
                             isEmptyFolder = !FindAccessibleDescendants(directory, out string[] _, trySpecialFolders: false);
@@ -426,6 +430,7 @@ namespace FilesAndFolders.Portable
             { }
 #endif
         }
+
         /// <summary>
         /// Attempts to determine whether the specified directory or any of its accessible descendants contain
         /// files or subdirectories that can be accessed without throwing exceptions. If found, the method
@@ -440,6 +445,7 @@ namespace FilesAndFolders.Portable
         /// <returns>true if any accessible descendants or special folders are found; otherwise, false.</returns>
         bool FindAccessibleDescendants(string current, out string[] accessiblePaths, bool trySpecialFolders)
         {
+            accessiblePaths = Array.Empty<string>();
             var builder = new List<string>();
             try
             {
