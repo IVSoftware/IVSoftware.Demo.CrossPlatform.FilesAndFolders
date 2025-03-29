@@ -1,5 +1,6 @@
 ﻿using IVSoftware.Portable.Xml.Linq.XBoundObject;
 using IVSoftware.Portable.Xml.Linq.XBoundObject.Placement;
+using static IVSoftware.Portable.Threading.Extensions;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -20,7 +21,6 @@ namespace BasicPlacement.Maui
                 .Replace('\\', Path.DirectorySeparatorChar);
 
             BindingContext.XRoot.Show(path);
-            BindingContext.SyncListToXML();
         }
         new MainPageViewModel BindingContext => (MainPageViewModel)base.BindingContext;
     }
@@ -28,7 +28,7 @@ namespace BasicPlacement.Maui
     {
         public MainPageViewModel() 
         {
-            XRoot = new XElement("root").UseXBoundView(FileItems);
+            XRoot = new XElement("root").WithXBoundView(FileItems);
         }
         public XElement XRoot { get; }
         public ObservableCollection<FileItem> FileItems { get; } = new();
@@ -37,9 +37,7 @@ namespace BasicPlacement.Maui
     }
     class FileItem :  XBoundViewObjectImplementer
     {
-        public string Text => XEL.Attribute("text")?.Value ?? string.Empty;
-
-        public string PlusMinusGlyph
+        public override string PlusMinusGlyph
         {
             get
             {
@@ -53,20 +51,6 @@ namespace BasicPlacement.Maui
                     default:
                         return "\uE805";
                 }
-            }
-        }
-
-        public int Space => 10 * (XEL.Ancestors().Count() - 1);
-
-        protected override void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-        {
-            base.OnPropertyChanged(propertyName);
-            switch (propertyName)
-            {
-                case nameof(PlusMinus):
-                    OnPropertyChanged(nameof(PlusMinusGlyph));
-                    OnPropertyChanged(nameof(Space));
-                    break;
             }
         }
     }
