@@ -69,9 +69,9 @@ There is no need for recursion here. The width of the `BoxView` creates the 2-di
 
 ___
 
-**Under the Hood**
+**How it Works**
 
-When the `MainPage` ctor calls the `Show` extension for the example path, the result will be a 2D projection onto the root `XElement` with attributes for visibility and the `+/-` expander. Alternatively, to add nodes to the XML hierarchy _without_ showing them, the `XRoot.FindOrCreate(path)` method instead (see [full documentation](https://github.com/IVSoftware/IVSoftware.Portable.Xml.Linq.XBoundObject/blob/master/README/Placer.md) in the repo).
+When the `MainPage` ctor calls the `Show` extension for the example path, the result will be a 2D projection onto the root `XElement` with attributes for visibility and the `+/-` expander. Alternatively, to add nodes to the XML hierarchy _without_ showing them, the `XRoot.FindOrCreate<T>(path)` method instead (see [full documentation](https://github.com/IVSoftware/IVSoftware.Portable.Xml.Linq.XBoundObject/blob/master/README/Placer.md) in the repo).
 
 ##### MainPage View
 

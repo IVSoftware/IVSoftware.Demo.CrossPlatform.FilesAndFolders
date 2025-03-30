@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using System.Xml.Linq;
+using IVSoftware.Portable.Xml.Linq;
 
 namespace BasicPlacement.Maui
 {

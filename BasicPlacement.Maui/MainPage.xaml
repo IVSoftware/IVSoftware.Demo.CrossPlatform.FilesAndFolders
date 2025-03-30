@@ -31,9 +31,7 @@
                             Grid.Column="1" 
                             Text="{Binding PlusMinusGlyph}" 
                             TextColor="Black"
-                            Command="{
-                                Binding PlusMinusToggleCommand, 
-                                Source={x:Reference MainPageViewModel}}"
+                            Command="{Binding PlusMinusToggleCommand}"
                             CommandParameter="{Binding .}"
                             FontSize="16"
                             FontFamily="file-and-folder-icons"
